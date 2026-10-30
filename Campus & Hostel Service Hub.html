@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusDesk | Hostel & College Digital Service Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            hostel: {
+              dark: '#0f172a',
+              card: '#1e293b',
+              border: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    /* Pulse animation for security status */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .security-pulse {
+      animation: pulse-ring 2.5s infinite ease-in-out;
+    }
+    .noise-bg {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white noise-bg">
+
+  <!-- TOP FLOATING NAVBAR -->
+  <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight text-white">CampusDesk</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Hostel Desk Room 204
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Zero-Knowledge E2EE Printing & Student Services</p>
+        </div>
+      </div>
+
+      <!-- Live Role Switcher (Admin / Customer) -->
+      <div class="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800">
+        <button id="role-customer-btn" onclick="switchView('customer')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-indigo-600 text-white shadow-sm">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span>Student (Guest)</span>
+        </button>
+        <button id="role-admin-btn" onclick="switchView('admin')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+          <span>Desk Operator</span>
+          <span id="admin-badge-count" class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-500/20 text-indigo-300 font-mono">0</span>
+        </button>
+      </div>
+
+      <!-- Action Utilities -->
+      <div class="flex items-center gap-2">
+        <!-- Sound Toggle -->
+        <button id="sound-toggle-btn" onclick="toggleSound()" title="Toggle Audio FX" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700/60">
+          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-slate-300"></i>
+        </button>
+        <!-- Security Shield Info -->
+        <button onclick="openInfoModal()" title="E2EE Security Info" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-emerald-400 transition-colors border border-emerald-500/20">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 1. CUSTOMER PORTAL VIEW                    -->
+  <!-- ========================================== -->
+  <main id="customer-view" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+    
+    <!-- Hero / Anonymous Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 p-5 sm:p-6 shadow-xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Anonymous Session Active
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <i data-lucide="key-round" class="w-3.5 h-3.5"></i> AES-256 WebCrypto Client-Side
+            </span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Hostel & Campus Digital Service Center</h1>
+          <p class="text-sm text-slate-400 mt-1 max-w-2xl">
+            Order confidential prints, urgent form filings, or get technical fixes. No student account needed — files are encrypted directly in your browser before being transmitted.
+          </p>
+        </div>
+
+        <div class="bg-slate-950/80 backdrop-blur p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-4 min-w-[260px]">
+          <div>
+            <div class="text-[11px] text-slate-400 font-medium">Your Anonymous Session Token</div>
+            <div id="customer-token-display" class="font-mono text-sm text-indigo-400 font-bold tracking-wider">GUEST-XXXX</div>
+            <div class="text-[10px] text-slate-500">Auto-saved to local browser cache</div>
+          </div>
+          <button onclick="regenerateGuestIdentity()" title="New Anonymous Identity" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs for Customer -->
+    <div class="flex border-b border-slate-800 gap-2 sm:gap-4 overflow-x-auto pb-1 text-sm">
+      <button onclick="setCustomerTab('services')" id="ctab-services" class="customer-tab flex items-center gap-2 pb-3 px-3 font-semibold border-b-2 border-indigo-500 text-indigo-400 transition-all">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>Service Catalog & Order</span>
+      </button>
+      <button onclick="setCustomerTab('chat')" id="ctab-chat" class="customer-tab flex items-center gap-2 pb-3 px-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="message-square" class="w-4 h-4"></i>
+        <span>Encrypted Chat Room</span>
+        <span id="unread-chat-badge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-bold">1</span>
+      </button>
+      <button onclick="setCustomerTab('encryptor')" id="ctab-encryptor" class="customer-tab flex items-center gap-2 pb-3 px-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="file-lock" class="w-4 h-4"></i>
+        <span>Document Crypto Lab</span>
+      </button>
+      <button onclick="setCustomerTab('orders')" id="ctab-orders" class="customer-tab flex items-center gap-2 pb-3 px-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">
+        <i data-lucide="clock-rewind" class="w-4 h-4"></i>
+        <span>My Requests & Receipts</span>
+        <span id="customer-orders-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">0</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: SERVICE CATALOG -->
+    <div id="cpanel-services" class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>Choose a Service</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Instant Hostel Delivery Available</span>
+          </h2>
+          <p class="text-xs text-slate-400">All submissions feature instant client-side WebCrypto encryption</p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-slate-400">Hostel Desk Timing:</span>
+          <span class="px-2.5 py-1 rounded-md bg-slate-800 text-indigo-300 font-mono font-medium border border-slate-700">9:00 AM – 1:30 AM</span>
+        </div>
+      </div>
+
+      <!-- Service Cards Grid -->
+      <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </div>
+
+    <!-- TAB 2: ENCRYPTED CHAT ROOM -->
+    <div id="cpanel-chat" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[620px]">
+        
+        <!-- Chat Side Info -->
+        <div class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Security Tunnel</span>
+              <span class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> E2EE
+              </span>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
+                <div class="text-[11px] text-slate-400">Connected Desk</div>
+                <div class="text-sm font-semibold text-white">Hostel Desk Room 204 (Block B)</div>
+                <div class="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                  <i data-lucide="check-circle" class="w-3 h-3"></i> Operator Online (Raghav)
+                </div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
+                <div class="text-[11px] text-slate-400">Your Identity</div>
+                <div id="chat-guest-tag" class="text-sm font-semibold text-indigo-400 font-mono">Student #7492</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Zero personal identifiers shared</div>
+              </div>
+
+              <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
+                <div class="text-[11px] text-slate-400">Cryptographic Cipher</div>
+                <div class="text-xs font-mono text-slate-300">AES-GCM 256-bit + PBKDF2</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Ephemeral local browser keys</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3">
+            <p class="text-xs text-indigo-300 leading-relaxed">
+              💡 Need to attach confidential exam credentials or ID proofs? Use the paperclip icon to encrypt on the fly!
+            </p>
+          </div>
+        </div>
+
+        <!-- Main Chat Box -->
+        <div class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden">
+          
+          <!-- Chat Header -->
+          <div class="p-3.5 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-xs">
+                  OP
+                </div>
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-white">Desk Operator Assistant</div>
+                <div class="text-[11px] text-slate-400">Live chat & order dispatch</div>
+              </div>
+            </div>
+
+            <!-- Pre-set Quick Prompts -->
+            <div class="hidden sm:flex items-center gap-1.5">
+              <button onclick="sendQuickChat('Can you do urgent 10-page spiral binding right now?')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition-colors border border-slate-700">
+                ⚡ Urgent binding?
+              </button>
+              <button onclick="sendQuickChat('Where do I collect my document?')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition-colors border border-slate-700">
+                📍 Room 204 location?
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Messages Scroll Area -->
+          <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="p-3 bg-slate-950 border-t border-slate-800">
+            <form id="chat-form" onsubmit="handleCustomerSendMessage(event)" class="flex items-center gap-2">
+              
+              <!-- Encrypted File Trigger Button -->
+              <button type="button" onclick="triggerChatFileEncrypt()" title="Attach Encrypted File (E2EE)" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 transition-colors border border-slate-700 relative">
+                <i data-lucide="paperclip" class="w-4 h-4"></i>
+                <span class="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </button>
+              <input type="file" id="chat-file-input" class="hidden" onchange="handleChatFileUpload(event)" />
+
+              <input 
+                type="text" 
+                id="chat-input" 
+                placeholder="Type a message to desk operator..." 
+                autocomplete="off"
+                class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+
+              <button type="submit" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-colors shadow-lg shadow-indigo-600/30">
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </form>
+            <div class="mt-1.5 flex items-center justify-between text-[10px] text-slate-500 px-1">
+              <span>Messages protected by local session key</span>
+              <span>Hit Enter to dispatch</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: DOCUMENT CRYPTO LAB (Standalone Client-Side Encryption) -->
+    <div id="cpanel-encryptor" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div class="max-w-3xl">
+          <div class="flex items-center gap-2 text-emerald-400 text-xs font-mono mb-2">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span>STANDALONE CLIENT-SIDE CRYPTOGRAPHIC ENGINE</span>
+          </div>
+          <h2 class="text-xl font-bold text-white">Zero-Knowledge Document Encryptor</h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Test and inspect how your confidential PDFs, Aadhaar cards, admit cards, or assignment reports are processed with the browser's native <code class="text-indigo-400 font-mono">crypto.subtle</code> API. The operator cannot decrypt unless they have the matching key.
+          </p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Step 1: File Selection & Key -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">1. Choose File to Encrypt</label>
+              <div 
+                id="drop-zone"
+                onclick="document.getElementById('lab-file-input').click()" 
+                class="border-2 border-dashed border-slate-700 hover:border-indigo-500/80 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-950/40 group"
+              >
+                <input type="file" id="lab-file-input" class="hidden" onchange="handleLabFileSelect(event)" />
+                <div class="w-12 h-12 rounded-xl bg-slate-800 group-hover:bg-indigo-600/20 group-hover:text-indigo-400 flex items-center justify-center mx-auto text-slate-400 transition-colors">
+                  <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                </div>
+                <div id="lab-file-label" class="mt-3 text-sm text-slate-300 font-medium">Click or Drag & Drop File</div>
+                <p class="text-xs text-slate-500 mt-1">PDF, DOCX, JPG, PNG up to 25MB</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">2. Shared Passphrase / Encryption Key</label>
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="lab-crypto-key" 
+                  value="HOSTEL-DESK-KEY-2026" 
+                  class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-indigo-300 focus:outline-none focus:border-indigo-500"
+                />
+                <button type="button" onclick="generateRandomPassphrase()" title="Generate Random" class="absolute right-2 top-2 px-2 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg text-slate-300">
+                  Generate
+                </button>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">The Hostel Desk uses the default key unless you send a custom one via chat.</p>
+            </div>
+
+            <button 
+              id="encrypt-run-btn"
+              onclick="executeClientSideEncryption()" 
+              class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+            >
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              <span>Encrypt with AES-GCM (256-bit)</span>
+            </button>
+          </div>
+
+          <!-- Step 2: Live Cryptographic Inspection Output -->
+          <div class="bg-slate-950 rounded-2xl border border-slate-800 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span class="text-xs font-mono text-emerald-400 font-semibold flex items-center gap-1.5">
+                  <i data-lucide="binary" class="w-4 h-4"></i> CIPHER DATA TELEMETRY
+                </span>
+                <span id="lab-cipher-status" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Idle</span>
+              </div>
+
+              <div class="mt-4 space-y-3 text-xs font-mono">
+                <div>
+                  <div class="text-[10px] text-slate-500 uppercase">Initialization Vector (IV - 12 Bytes):</div>
+                  <div id="output-iv" class="text-slate-400 bg-slate-900 p-2 rounded-lg break-all mt-1">000000000000000000000000</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] text-slate-500 uppercase">SHA-256 Payload Hash:</div>
+                  <div id="output-hash" class="text-indigo-400 bg-slate-900 p-2 rounded-lg break-all mt-1">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] text-slate-500 uppercase">Ciphertext Preview (Base64 Sample):</div>
+                  <div id="output-cipher-preview" class="text-amber-400/90 bg-slate-900 p-2 rounded-lg break-all mt-1 max-h-24 overflow-y-auto">
+                    Awaiting document encryption...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+              <span class="text-[11px] text-slate-500">Zero plain text ever leaves device</span>
+              <button id="download-enc-btn" disabled onclick="downloadEncryptedArtifact()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-xs font-medium text-slate-300 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Download .enc
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: MY ORDERS & RECEIPTS -->
+    <div id="cpanel-orders" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-white">Your Anonymous Submissions & Receipts</h2>
+        <button onclick="refreshCustomerOrders()" class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3 h-3"></i> Sync
+        </button>
+      </div>
+
+      <div id="customer-orders-list" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 2. DESK OPERATOR / ADMIN VIEW              -->
+  <!-- ========================================== -->
+  <main id="admin-view" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+    
+    <!-- Admin Top Banner -->
+    <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-500/30 rounded-2xl p-5 shadow-xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+              OPERATOR CONSOLE: ROOM 204
+            </span>
+            <span class="text-xs text-slate-400">Hostel Desk Active Station</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white">Client Requests & Decryption Terminal</h1>
+          <p class="text-xs text-slate-400 mt-1">Review incoming anonymous orders, decrypt client documents, verify UPI UTR numbers, and dispatch notifications.</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-slate-950/70 border border-slate-800 p-2.5 rounded-xl text-center min-w-[80px]">
+            <div id="stat-pending-orders" class="text-base font-bold text-amber-400 font-mono">0</div>
+            <div class="text-[10px] text-slate-400">Queue</div>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 p-2.5 rounded-xl text-center min-w-[80px]">
+            <div id="stat-revenue" class="text-base font-bold text-emerald-400 font-mono">₹0</div>
+            <div class="text-[10px] text-slate-400">Total Paid</div>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 p-2.5 rounded-xl text-center min-w-[80px]">
+            <div id="stat-completed" class="text-base font-bold text-indigo-400 font-mono">0</div>
+            <div class="text-[10px] text-slate-400">Done</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Operational Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left 2 Cols: Orders & Decryption Station -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="inbox" class="w-4 h-4 text-indigo-400"></i>
+            <span>Active Order Stream</span>
+          </h2>
+          <div class="flex items-center gap-2">
+            <button onclick="clearDemoData()" class="text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded border border-slate-800">
+              Clear All Data
+            </button>
+            <button onclick="populateSampleData()" class="text-[11px] text-indigo-300 hover:text-indigo-200 px-2 py-1 rounded bg-indigo-950/60 border border-indigo-800/60">
+              + Load Test Order
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Cards Stream -->
+        <div id="admin-orders-stream" class="space-y-4">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Right 1 Col: Operator Chat Control & Desk UPI Configuration -->
+      <div class="space-y-6">
+        
+        <!-- Live Chat Mirror / Quick Reply -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col h-[400px]">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="message-square" class="w-4 h-4 text-indigo-400"></i>
+              <span class="text-xs font-bold text-white">Student Chat Channel</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Live</span>
+          </div>
+
+          <div id="admin-chat-preview" class="flex-1 overflow-y-auto p-2 space-y-2 text-xs">
+            <!-- Mirrored messages -->
+          </div>
+
+          <!-- Operator Reply Input -->
+          <form onsubmit="handleOperatorSendChat(event)" class="mt-2 pt-2 border-t border-slate-800 flex gap-2">
+            <input 
+              type="text" 
+              id="admin-chat-input" 
+              placeholder="Operator quick response..." 
+              class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            />
+            <button type="submit" class="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </form>
+
+          <div class="flex flex-wrap gap-1 mt-2">
+            <button onclick="operatorQuickReply('Your print is ready for pickup at Room 204!')" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Print ready
+            </button>
+            <button onclick="operatorQuickReply('Payment confirmed. Processing your document now.')" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Payment ok
+            </button>
+            <button onclick="operatorQuickReply('Please upload higher resolution PDF for clear print.')" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Need clean file
+            </button>
+          </div>
+        </div>
+
+        <!-- Desk UPI & Pricing Settings -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+            <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+            <span class="text-xs font-bold text-white uppercase tracking-wider">Hostel Payment Config</span>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400 block mb-1">Operator VPA / UPI ID</label>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="admin-upi-vpa" 
+                value="raghav.hostel204@okhdfcbank" 
+                class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500"
+              />
+              <button onclick="updateUpiVpa()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 rounded-lg transition-colors">
+                Save
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1">Directly generates student scan-to-pay QR codes</p>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800">
+            <label class="text-[11px] text-slate-400 block mb-1">Hostel Master Decryption Key</label>
+            <input 
+              type="text" 
+              id="admin-master-key" 
+              value="HOSTEL-DESK-KEY-2026" 
+              class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500"
+            />
+            <p class="text-[10px] text-slate-500 mt-1">Used to decrypt client uploads</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL 1: ORDER CREATION MODAL              -->
+  <!-- ========================================== -->
+  <div id="order-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center">
+            <i data-lucide="file-plus" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="modal-service-title" class="text-sm font-bold text-white">Service Booking</h3>
+            <span id="modal-service-category" class="text-[10px] text-slate-400 font-medium">Printing Services</span>
+          </div>
+        </div>
+        <button onclick="closeOrderModal()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="order-form" onsubmit="handleOrderFormSubmit(event)" class="p-5 overflow-y-auto space-y-4 flex-1">
+        <input type="hidden" id="order-service-id" />
+        <input type="hidden" id="order-service-unit-price" />
+
+        <!-- Security Notice -->
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-2.5">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+          <p class="text-xs text-emerald-300">
+            Files uploaded here are encrypted locally using AES-GCM before uploading. No one in the hostel Wi-Fi network can peek into your papers.
+          </p>
+        </div>
+
+        <!-- Document / File Upload Section -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Attach Document / Photo / Screenshot <span class="text-slate-400 font-normal">(Optional if typing details below)</span>
+          </label>
+          <div 
+            id="order-drop-zone"
+            onclick="document.getElementById('order-file-input').click()"
+            class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-950/60"
+          >
+            <input type="file" id="order-file-input" class="hidden" onchange="handleOrderFileSelect(event)" />
+            <i data-lucide="file-lock" class="w-6 h-6 text-indigo-400 mx-auto"></i>
+            <div id="order-file-name-display" class="mt-2 text-xs font-medium text-slate-300">Click to attach file / screenshot</div>
+            <div id="order-file-size-display" class="text-[10px] text-slate-500">PDF, JPG, PNG, DOCX</div>
+          </div>
+          <!-- Encryption status preview -->
+          <div id="order-enc-badge" class="hidden mt-2 flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono">
+            <span class="text-emerald-400 flex items-center gap-1">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i> AES-GCM Encrypted
+            </span>
+            <span id="order-hash-preview" class="text-slate-400">Hash: ...</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Inputs: Page Count / Quantity -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">
+              Quantity / Count
+            </label>
+            <input 
+              type="number" 
+              id="order-quantity" 
+              value="1" 
+              min="1" 
+              max="500" 
+              oninput="recalculateOrderTotal()"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">
+              Hostel Room / Phone No.
+            </label>
+            <input 
+              type="text" 
+              id="order-room-input" 
+              placeholder="e.g. Block C - 312 or Phone No" 
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <!-- Custom Instructions -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">
+            Service Details / ID Numbers <span class="text-indigo-400 font-semibold">(Encrypted with AES-256)</span>
+          </label>
+          <textarea 
+            id="order-notes" 
+            rows="3" 
+            placeholder="Enter your Aadhaar No, Vehicle RC No, Mobile No, or PAN details here. Transmitted with zero-knowledge client encryption..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Total Calculation Pill -->
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-slate-400">Total Payable</div>
+            <div class="text-xs text-slate-500" id="order-breakdown-text">1 unit × ₹2.00</div>
+          </div>
+          <div id="order-total-price" class="text-xl font-bold font-mono text-emerald-400">₹2.00</div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="order-submit-btn" 
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2"
+        >
+          <i data-lucide="credit-card" class="w-4 h-4"></i>
+          <span>Proceed to UPI Payment</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 2: UPI PAYMENT GATEWAY MODAL         -->
+  <!-- ========================================== -->
+  <div id="payment-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      
+      <!-- Payment Header -->
+      <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="qr-code" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Instant UPI Pay</h3>
+            <span class="text-[10px] text-emerald-400 font-mono">Real-Time Verification</span>
+          </div>
+        </div>
+        <button onclick="closePaymentModal()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Payment Body -->
+      <div class="p-5 space-y-4">
+        
+        <div class="text-center">
+          <span class="text-xs text-slate-400">Scan using any UPI App (GPay, PhonePe, Paytm)</span>
+          <div class="mt-1 text-2xl font-black font-mono text-emerald-400" id="pay-amount-display">₹10.00</div>
+          <div class="text-[11px] text-slate-500 font-mono" id="pay-order-ref">REF: ORD-XXXX</div>
+        </div>
+
+        <!-- Generated QR Code Container -->
+        <div class="bg-white p-4 rounded-2xl w-52 h-52 mx-auto flex items-center justify-center shadow-lg border border-slate-300">
+          <img id="upi-qr-image" src="" alt="UPI QR Code" class="w-full h-full object-contain" />
+        </div>
+
+        <!-- UPI Copy Details -->
+        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div class="truncate mr-2">
+            <div class="text-[10px] text-slate-400 uppercase font-mono">Hostel Desk UPI ID</div>
+            <div id="pay-vpa-display" class="text-xs font-mono text-slate-200 truncate">raghav.hostel204@okhdfcbank</div>
+          </div>
+          <button onclick="copyUpiVpa()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-indigo-300 rounded-lg transition-colors flex items-center gap-1 shrink-0">
+            <i data-lucide="copy" class="w-3 h-3"></i> Copy
+          </button>
+        </div>
+
+        <!-- UTR / Ref Input -->
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <label class="block text-xs font-medium text-slate-300">
+            Enter 12-digit UTR / Ref Number after payment:
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="pay-utr-input" 
+              placeholder="e.g. 429381048291" 
+              maxlength="16"
+              class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+            />
+            <button 
+              onclick="verifyAndConfirmPayment()" 
+              id="pay-confirm-btn"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/30 flex items-center gap-1.5 shrink-0"
+            >
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span>Confirm</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-500">Operator Room 204 will instantly receive verification notice</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 3: E2EE INFO MODAL                   -->
+  <!-- ========================================== -->
+  <div id="info-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2 text-emerald-400">
+          <i data-lucide="lock" class="w-5 h-5"></i>
+          <h3 class="font-bold text-white">Zero-Knowledge Hostel Security</h3>
+        </div>
+        <button onclick="closeInfoModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-300 space-y-3 leading-relaxed">
+        <p>
+          Students often print sensitive items: <strong>Aadhaar cards, exam hall tickets, medical certificates, and confidential resumes</strong>. Normal campus cyber cafes keep these unencrypted in desktop downloads folders.
+        </p>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5 font-mono text-[11px]">
+          <div class="text-emerald-400">🔒 AES-GCM 256-bit encryption</div>
+          <div class="text-indigo-400">🔑 PBKDF2 with 100,000 iterations</div>
+          <div class="text-amber-400">🛡️ 12-byte cryptographically random IV</div>
+          <div class="text-slate-400">⚡ Zero student sign-up / phone logs</div>
+        </div>
+        <p>
+          Files are converted into binary ciphertext inside your device before transmission. Only the authenticated hostel desk operator can decrypt it for the physical printer.
+        </p>
+      </div>
+
+      <button onclick="closeInfoModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">
+        Understood, Keep Me Protected
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT LOGIC & CRYPTO ENGINE           -->
+  <!-- ========================================== -->
+  <script>
+    /* ====================================================================
+       1. GLOBAL STATE & PERSISTENCE
+       ==================================================================== */
+    const STORAGE_KEY_ORDERS = 'campusdesk_orders_v1';
+    const STORAGE_KEY_CHATS = 'campusdesk_chats_v1';
+    const STORAGE_KEY_TOKEN = 'campusdesk_guest_token_v1';
+    const STORAGE_KEY_VPA = 'campusdesk_upi_vpa_v1';
+
+    let soundEnabled = true;
+    let currentRole = 'customer'; // 'customer' or 'admin'
+    let currentCustomerTab = 'services';
+    let activePendingOrder = null;
+    let selectedOrderFile = null;
+    let selectedOrderCipherData = null;
+
+    // Cryptographic Lab state
+    let labSelectedFile = null;
+    let labEncryptedResult = null;
+
+    // Default Catalog Services
+    const SERVICES = [
+      {
+        id: 'pan_find_aadhar',
+        title: 'Find PAN or Print (via Aadhaar No)',
+        category: 'PAN Services',
+        pricePerUnit: 50,
+        unitLabel: 'per search',
+        icon: 'credit-card',
+        description: 'Instant PAN number lookup and official e-PAN PDF retrieval using your 12-digit Aadhaar card number.',
+        badge: 'Instant Lookup',
+        badgeColor: 'emerald'
+      },
+      {
+        id: 'voter_pdf',
+        title: 'Voter ID PDF (e-EPIC Download)',
+        category: 'Election & Voter',
+        pricePerUnit: 100,
+        unitLabel: 'per card',
+        icon: 'file-check',
+        description: 'Official high-resolution digital Voter Card (e-EPIC) PDF download with verified election commission details.',
+        badge: 'Official e-EPIC',
+        badgeColor: 'indigo'
+      },
+      {
+        id: 'dl_pdf',
+        title: 'Driving Licence (DL) PDF',
+        category: 'Transport / RTO',
+        pricePerUnit: 50,
+        unitLabel: 'per DL',
+        icon: 'car',
+        description: 'Verified digital Driving Licence PDF document fetch via Parivahan Sarathi database.',
+        badge: 'RTO Parivahan',
+        badgeColor: 'amber'
+      },
+      {
+        id: 'pan_to_aadhar',
+        title: 'PAN to Aadhaar Link & Status',
+        category: 'PAN Services',
+        pricePerUnit: 50,
+        unitLabel: 'per check',
+        icon: 'link-2',
+        description: 'Check official PAN-Aadhaar linkage status on Income Tax portal and get assisted penalty linking filing.',
+        badge: 'ITD Portal',
+        badgeColor: 'emerald'
+      },
+      {
+        id: 'echallan_status',
+        title: 'E-Challan Status & Details',
+        category: 'Traffic & Vehicle',
+        pricePerUnit: 50,
+        unitLabel: 'per vehicle',
+        icon: 'alert-triangle',
+        description: 'Real-time pending traffic police challan check by vehicle registration number with violation photo & fine breakdown.',
+        badge: 'Live RTO Check',
+        badgeColor: 'rose'
+      },
+      {
+        id: 'aadhar_to_mobile',
+        title: 'Aadhaar to Mobile Number Status',
+        category: 'UIDAI Services',
+        pricePerUnit: 20,
+        unitLabel: 'per check',
+        icon: 'phone',
+        description: 'Verify which active mobile number and email ID is linked to your 12-digit Aadhaar UID.',
+        badge: 'UIDAI Official',
+        badgeColor: 'indigo'
+      },
+      {
+        id: 'rc_print',
+        title: 'Vehicle RC Print (Registration Certificate)',
+        category: 'Transport / RTO',
+        pricePerUnit: 75,
+        unitLabel: 'per RC copy',
+        icon: 'file-text',
+        description: 'Official vehicle RC Smart Card PDF reprint (Bike, Scooter, Car) from Vahan portal with valid QR code.',
+        badge: 'Vahan Verified',
+        badgeColor: 'emerald'
+      },
+      {
+        id: 'mobile_to_pan',
+        title: 'Mobile to PAN Search',
+        category: 'PAN Services',
+        pricePerUnit: 50,
+        unitLabel: 'per lookup',
+        icon: 'search',
+        description: 'Retrieve lost or forgotten 10-digit PAN number linked to your registered mobile number.',
+        badge: 'Instant Recovery',
+        badgeColor: 'amber'
+      },
+      {
+        id: 'link_mobile_voter',
+        title: 'Link Mobile Number to Voter ID',
+        category: 'Election & Voter',
+        pricePerUnit: 100,
+        unitLabel: 'per application',
+        icon: 'user-plus',
+        description: 'Form 8 assistance to link or correct your personal mobile number on the National Voters Service Portal (NVSP).',
+        badge: 'NVSP Form 8',
+        badgeColor: 'indigo'
+      },
+      {
+        id: 'aadhar_bank_seeding',
+        title: 'Aadhaar to Bank Seeding Status (DBT/NPCI)',
+        category: 'Banking & DBT',
+        pricePerUnit: 50,
+        unitLabel: 'per account',
+        icon: 'landmark',
+        description: 'Check active NPCI Aadhaar bank account mapping status for college scholarships & DBT govt subsidies.',
+        badge: 'NPCI / DBT Active',
+        badgeColor: 'emerald'
+      },
+      {
+        id: 'print_bw',
+        title: 'Campus B&W Laser Printing',
+        category: 'Hostel Desk',
+        pricePerUnit: 2,
+        unitLabel: 'per page',
+        icon: 'printer',
+        description: 'Standard 75 GSM A4 paper laser quality prints for assignments, notes, and lab manuals.',
+        badge: 'Hostel Room Delivery',
+        badgeColor: 'slate'
+      }
+    ];
+
+    /* ====================================================================
+       2. INITIALIZATION
+       ==================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeGuestIdentity();
+      renderServicesCatalog();
+      syncOrdersFromStorage();
+      syncChatsFromStorage();
+      updateAdminStats();
+      lucide.createIcons();
+    });
+
+    function getSavedOrders() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_ORDERS) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveOrders(orders) {
+      localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(orders));
+      syncOrdersFromStorage();
+      updateAdminStats();
+    }
+
+    function getSavedChats() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_CHATS) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveChats(chats) {
+      localStorage.setItem(STORAGE_KEY_CHATS, JSON.stringify(chats));
+      renderChatMessages();
+      renderAdminChatPreview();
+    }
+
+    function getUpiVpa() {
+      return localStorage.getItem(STORAGE_KEY_VPA) || 'raghav.hostel204@okhdfcbank';
+    }
+
+    /* ====================================================================
+       3. ANONYMOUS GUEST IDENTITY & SESSION
+       ==================================================================== */
+    function initializeGuestIdentity() {
+      let token = localStorage.getItem(STORAGE_KEY_TOKEN);
+      if (!token) {
+        token = 'HOSTEL-' + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem(STORAGE_KEY_TOKEN, token);
+      }
+      document.getElementById('customer-token-display').innerText = token;
+      document.getElementById('chat-guest-tag').innerText = 'Student #' + token;
+    }
+
+    function regenerateGuestIdentity() {
+      const newToken = 'HOSTEL-' + Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem(STORAGE_KEY_TOKEN, newToken);
+      document.getElementById('customer-token-display').innerText = newToken;
+      document.getElementById('chat-guest-tag').innerText = 'Student #' + newToken;
+      showToast('New anonymous session ID assigned: ' + newToken, 'info');
+      playTone(520, 'sine', 0.1);
+    }
+
+    /* ====================================================================
+       4. CLIENT-SIDE WEB CRYPTO API (AES-GCM 256-BIT)
+       ==================================================================== */
+    // Helper: Derive CryptoKey from textual password using PBKDF2
+    async function deriveKeyFromPassphrase(passphrase, saltBuffer) {
+      const enc = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw",
+        enc.encode(passphrase),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      );
+
+      return window.crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: saltBuffer,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    // Helper: Calculate SHA-256 Digest of ArrayBuffer
+    async function calculateSHA256(arrayBuffer) {
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Convert ArrayBuffer to Base64
+    function bufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const len = bytes.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
+    // Convert Base64 to ArrayBuffer
+    function base64ToBuffer(base64) {
+      const binaryString = window.atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
+    // Primary Client-Side Encryption Function
+    async function encryptDocument(file, customPassphrase = "HOSTEL-DESK-KEY-2026") {
+      const fileData = await file.arrayBuffer();
+      const sha256 = await calculateSHA256(fileData);
+
+      // Generate random salt and IV
+      const salt = window.crypto.getRandomValues(new Uint8Array(16));
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+      // Derive key
+      const key = await deriveKeyFromPassphrase(customPassphrase, salt);
+
+      // Encrypt
+      const encryptedBuffer = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        fileData
+      );
+
+      return {
+        fileName: file.name,
+        fileType: file.type || 'application/octet-stream',
+        fileSize: file.size,
+        ivBase64: bufferToBase64(iv),
+        saltBase64: bufferToBase64(salt),
+        cipherBase64: bufferToBase64(encryptedBuffer),
+        sha256: sha256,
+        encryptedAt: new Date().toISOString()
+      };
+    }
+
+    // Primary Client-Side Decryption Function (Used by Desk Admin)
+    async function decryptDocument(encryptedPayload, passphrase = "HOSTEL-DESK-KEY-2026") {
+      try {
+        const salt = new Uint8Array(base64ToBuffer(encryptedPayload.saltBase64));
+        const iv = new Uint8Array(base64ToBuffer(encryptedPayload.ivBase64));
+        const cipherBuffer = base64ToBuffer(encryptedPayload.cipherBase64);
+
+        const key = await deriveKeyFromPassphrase(passphrase, salt);
+
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          cipherBuffer
+        );
+
+        return {
+          success: true,
+          buffer: decryptedBuffer,
+          blob: new Blob([decryptedBuffer], { type: encryptedPayload.fileType })
+        };
+      } catch (err) {
+        console.error("Decryption failed:", err);
+        return {
+          success: false,
+          error: "Invalid passphrase or corrupted ciphertext authentication tag."
+        };
+      }
+    }
+
+    /* ====================================================================
+       5. LAB ENCRYPTION CONTROLLER (Interactive Playground)
+       ==================================================================== */
+    function handleLabFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      labSelectedFile = file;
+      document.getElementById('lab-file-label').innerHTML = `<span class="text-emerald-400 font-bold">${file.name}</span> (${(file.size / 1024).toFixed(1)} KB)`;
+      document.getElementById('lab-cipher-status').innerText = 'Ready to encrypt';
+      document.getElementById('lab-cipher-status').className = 'text-[11px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300';
+    }
+
+    function generateRandomPassphrase() {
+      const words = ['HOSTEL', 'CIPHER', 'DELTA', 'OMEGA', 'BLOCK-B', 'VAULT'];
+      const p = words[Math.floor(Math.random() * words.length)] + '-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('lab-crypto-key').value = p;
+      showToast('Generated fresh passphrase: ' + p, 'info');
+    }
+
+    async function executeClientSideEncryption() {
+      if (!labSelectedFile) {
+        showToast('Please select a file first!', 'error');
+        return;
+      }
+      const passphrase = document.getElementById('lab-crypto-key').value.trim() || 'HOSTEL-DESK-KEY-2026';
+      
+      const btn = document.getElementById('encrypt-run-btn');
+      btn.innerHTML = `<span class="animate-spin mr-2">⚙️</span> Processing WebCrypto AES-GCM...`;
+      btn.disabled = true;
+
+      try {
+        const result = await encryptDocument(labSelectedFile, passphrase);
+        labEncryptedResult = result;
+
+        // Populate telemetry
+        document.getElementById('output-iv').innerText = result.ivBase64;
+        document.getElementById('output-hash').innerText = result.sha256;
+        document.getElementById('output-cipher-preview').innerText = result.cipherBase64.substring(0, 240) + '... [Total ' + result.cipherBase64.length + ' chars]';
+
+        document.getElementById('lab-cipher-status').innerText = 'AES-GCM-256 Valid';
+        document.getElementById('lab-cipher-status').className = 'text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold';
+
+        document.getElementById('download-enc-btn').disabled = false;
+        showToast('Document successfully encrypted on client device!', 'success');
+        playTone(660, 'triangle', 0.15);
+      } catch (err) {
+        showToast('Encryption error: ' + err.message, 'error');
+      } finally {
+        btn.innerHTML = `<i data-lucide="lock" class="w-4 h-4 mr-2"></i><span>Encrypt with AES-GCM (256-bit)</span>`;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    function downloadEncryptedArtifact() {
+      if (!labEncryptedResult) return;
+      const jsonStr = JSON.stringify(labEncryptedResult, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${labEncryptedResult.fileName}.encrypted.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Encrypted JSON bundle downloaded', 'info');
+    }
+
+    /* ====================================================================
+       6. SERVICE CATALOG & BOOKING MODAL
+       ==================================================================== */
+    function renderServicesCatalog() {
+      const container = document.getElementById('services-grid');
+      container.innerHTML = SERVICES.map(srv => `
+        <div class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-${srv.badgeColor}-500/10 text-${srv.badgeColor}-400 border border-${srv.badgeColor}-500/20">
+                ${srv.badge}
+              </span>
+              <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-indigo-400">
+                <i data-lucide="${srv.icon}" class="w-4 h-4"></i>
+              </div>
+            </div>
+
+            <h3 class="font-bold text-white text-base">${srv.title}</h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">${srv.description}</p>
+          </div>
+
+          <div class="pt-4 mt-4 border-t border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-500 uppercase font-mono">Price</div>
+              <div class="text-lg font-bold font-mono text-emerald-400">
+                ₹${srv.pricePerUnit} <span class="text-xs text-slate-400 font-sans font-normal">${srv.unitLabel}</span>
+              </div>
+            </div>
+            <button 
+              onclick="openOrderModal('${srv.id}')"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-indigo-600/30 flex items-center gap-1.5"
+            >
+              <span>Order Now</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openOrderModal(serviceId) {
+      const srv = SERVICES.find(s => s.id === serviceId);
+      if (!srv) return;
+
+      document.getElementById('order-service-id').value = srv.id;
+      document.getElementById('order-service-unit-price').value = srv.pricePerUnit;
+      document.getElementById('modal-service-title').innerText = srv.title;
+      document.getElementById('modal-service-category').innerText = srv.category;
+
+      // Reset form
+      selectedOrderFile = null;
+      selectedOrderCipherData = null;
+      document.getElementById('order-file-input').value = '';
+      document.getElementById('order-quantity').value = '1';
+      document.getElementById('order-file-name-display').innerText = 'Click to attach file';
+      document.getElementById('order-file-size-display').innerText = 'PDF, JPG, PNG, DOCX';
+      document.getElementById('order-enc-badge').classList.add('hidden');
+
+      recalculateOrderTotal();
+      document.getElementById('order-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeOrderModal() {
+      document.getElementById('order-modal').classList.add('hidden');
+    }
+
+    function recalculateOrderTotal() {
+      const unit = parseFloat(document.getElementById('order-service-unit-price').value || 0);
+      const qty = parseInt(document.getElementById('order-quantity').value || 1, 10);
+      const validQty = Math.max(1, isNaN(qty) ? 1 : qty);
+      const total = unit * validQty;
+
+      document.getElementById('order-breakdown-text').innerText = `${validQty} unit(s) × ₹${unit.toFixed(2)}`;
+      document.getElementById('order-total-price').innerText = `₹${total.toFixed(2)}`;
+      return total;
+    }
+
+    async function handleOrderFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      selectedOrderFile = file;
+      document.getElementById('order-file-name-display').innerText = file.name;
+      document.getElementById('order-file-size-display').innerText = `${(file.size / 1024).toFixed(1)} KB - Encrypting in browser...`;
+
+      // Perform background client encryption
+      try {
+        const cipher = await encryptDocument(file, "HOSTEL-DESK-KEY-2026");
+        selectedOrderCipherData = cipher;
+        document.getElementById('order-hash-preview').innerText = 'SHA: ' + cipher.sha256.substring(0, 10) + '...';
+        document.getElementById('order-enc-badge').classList.remove('hidden');
+        document.getElementById('order-file-size-display').innerText = `${(file.size / 1024).toFixed(1)} KB - Encrypted & Ready`;
+        showToast('Document encrypted on your machine with AES-GCM!', 'info');
+      } catch (err) {
+        showToast('Failed to encrypt file: ' + err.message, 'error');
+      }
+      lucide.createIcons();
+    }
+
+    async function handleOrderFormSubmit(e) {
+      e.preventDefault();
+      const serviceId = document.getElementById('order-service-id').value;
+      const srv = SERVICES.find(s => s.id === serviceId);
+      const qty = parseInt(document.getElementById('order-quantity').value || 1, 10);
+      const room = document.getElementById('order-room-input').value.trim() || 'Room 204 Pickup';
+      const notes = document.getElementById('order-notes').value.trim();
+      const amount = recalculateOrderTotal();
+      const guestToken = localStorage.getItem(STORAGE_KEY_TOKEN) || 'GUEST';
+
+      // If user typed details instead of attaching a file, encrypt the sensitive text directly
+      if (!selectedOrderCipherData) {
+        if (!notes) {
+          showToast('Please attach a document or enter your ID / Number / Details in the field.', 'error');
+          return;
+        }
+
+        const textBlob = new Blob([
+          `SERVICE: ${srv.title} (₹${srv.pricePerUnit})\nCUSTOMER DETAILS / ID NUMBER:\n${notes}\nCONTACT / ROOM: ${room}\nTIMESTAMP: ${new Date().toISOString()}`
+        ], { type: 'text/plain' });
+        textBlob.name = `${srv.id}_encrypted_details.txt`;
+
+        try {
+          selectedOrderCipherData = await encryptDocument(textBlob, "HOSTEL-DESK-KEY-2026");
+        } catch (err) {
+          showToast('Failed to encrypt input details: ' + err.message, 'error');
+          return;
+        }
+      }
+
+      // Generate Order Record
+      const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+      const newOrder = {
+        id: orderId,
+        serviceId: srv.id,
+        serviceTitle: srv.title,
+        quantity: qty,
+        amount: amount,
+        guestToken: guestToken,
+        roomNumber: room,
+        notes: notes,
+        status: 'AWAITING_PAYMENT', // 'AWAITING_PAYMENT', 'VERIFIED', 'READY', 'DELIVERED'
+        utr: null,
+        encryptedFile: selectedOrderCipherData,
+        createdAt: new Date().toISOString()
+      };
+
+      activePendingOrder = newOrder;
+
+      // Close order modal and open payment modal
+      closeOrderModal();
+      openPaymentModal(newOrder);
+    }
+
+    /* ====================================================================
+       7. UPI PAYMENT & MODAL CONTROLLER
+       ==================================================================== */
+    function openPaymentModal(order) {
+      activePendingOrder = order;
+      const vpa = getUpiVpa();
+      const formattedAmount = order.amount.toFixed(2);
+      
+      document.getElementById('pay-amount-display').innerText = `₹${formattedAmount}`;
+      document.getElementById('pay-order-ref').innerText = `REF: ${order.id}`;
+      document.getElementById('pay-vpa-display').innerText = vpa;
+      document.getElementById('pay-utr-input').value = '';
+
+      // Standard UPI specification URL
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent("CampusDesk Hostel 204")}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent(order.id)}`;
+
+      // Generate visual QR Code
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=2&data=${encodeURIComponent(upiUrl)}`;
+      document.getElementById('upi-qr-image').src = qrApiUrl;
+
+      document.getElementById('payment-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closePaymentModal() {
+      document.getElementById('payment-modal').classList.add('hidden');
+    }
+
+    function copyUpiVpa() {
+      const vpa = getUpiVpa();
+      copyToClipboard(vpa);
+      showToast('UPI ID copied to clipboard: ' + vpa, 'success');
+      playTone(700, 'sine', 0.08);
+    }
+
+    function verifyAndConfirmPayment() {
+      const utrInput = document.getElementById('pay-utr-input').value.trim();
+      if (!utrInput || utrInput.length < 6) {
+        showToast('Please enter a valid Bank UTR or Transaction reference ID.', 'error');
+        return;
+      }
+
+      if (!activePendingOrder) return;
+
+      const btn = document.getElementById('pay-confirm-btn');
+      btn.innerHTML = `<span class="animate-spin">⚙️</span> Verifying...`;
+      btn.disabled = true;
+
+      setTimeout(() => {
+        // Complete the order
+        activePendingOrder.status = 'PAID_PENDING_PRINT';
+        activePendingOrder.utr = utrInput;
+
+        const allOrders = getSavedOrders();
+        allOrders.unshift(activePendingOrder);
+        saveOrders(allOrders);
+
+        // Also post automated notification to chat
+        postChatMessage({
+          sender: 'system',
+          text: `🧾 Order ${activePendingOrder.id} submitted for "${activePendingOrder.serviceTitle}". Amount: ₹${activePendingOrder.amount}. UTR: ${utrInput}. Operator notified.`,
+          isSystem: true
+        });
+
+        btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Confirm`;
+        btn.disabled = false;
+        closePaymentModal();
+
+        showToast(`Payment registered! Order #${activePendingOrder.id} placed.`, 'success');
+        playTone(880, 'sine', 0.2);
+        
+        // Switch to Orders Tab so user can see it
+        setCustomerTab('orders');
+        lucide.createIcons();
+      }, 700);
+    }
+
+    /* ====================================================================
+       8. CUSTOMER ORDERS & RECEIPTS
+       ==================================================================== */
+    function syncOrdersFromStorage() {
+      const allOrders = getSavedOrders();
+      const currentToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+      const myOrders = allOrders.filter(o => o.guestToken === currentToken);
+
+      document.getElementById('customer-orders-count').innerText = myOrders.length;
+      const container = document.getElementById('customer-orders-list');
+
+      if (myOrders.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+            <i data-lucide="inbox" class="w-10 h-10 text-slate-600 mx-auto"></i>
+            <h4 class="text-sm font-semibold text-slate-300 mt-2">No active orders yet</h4>
+            <p class="text-xs text-slate-500 mt-1">Select a service above to send your first confidential print or request.</p>
+            <button onclick="setCustomerTab('services')" class="mt-4 px-4 py-2 rounded-xl bg-indigo-600 text-xs font-semibold text-white">
+              Browse Services
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = myOrders.map(order => {
+        let statusBadge = '';
+        if (order.status === 'PAID_PENDING_PRINT') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Processing at Room 204</span>`;
+        } else if (order.status === 'READY') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">✅ Ready for Pickup</span>`;
+        } else if (order.status === 'DELIVERED') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">Fulfilled</span>`;
+        } else {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[11px] bg-rose-500/10 text-rose-400 border border-rose-500/30">Awaiting UTR</span>`;
+        }
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="font-mono text-xs font-bold text-indigo-400">${order.id}</span>
+                <span class="text-xs text-slate-500">•</span>
+                <span class="text-xs text-slate-400">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                ${statusBadge}
+              </div>
+              <h3 class="text-sm font-bold text-white">${order.serviceTitle}</h3>
+              <div class="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-3">
+                <span>Room: <strong class="text-slate-200">${order.roomNumber}</strong></span>
+                <span>Qty: <strong class="text-slate-200">${order.quantity}</strong></span>
+                <span>Encrypted File: <strong class="text-emerald-400 font-mono">${order.encryptedFile ? order.encryptedFile.fileName : 'None'}</strong></span>
+                ${order.utr ? `<span class="font-mono text-[11px] text-slate-400">UTR: ${order.utr}</span>` : ''}
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
+              <div class="text-right">
+                <div class="text-sm font-bold font-mono text-emerald-400">₹${order.amount.toFixed(2)}</div>
+                <div class="text-[10px] text-slate-500">Paid via UPI</div>
+              </div>
+              <button onclick="downloadStudentReceipt('${order.id}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 rounded-xl transition-colors flex items-center gap-1.5">
+                <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                <span>Receipt</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderAdminOrdersStream();
+      lucide.createIcons();
+    }
+
+    function refreshCustomerOrders() {
+      syncOrdersFromStorage();
+      showToast('Order queue synced', 'info');
+      playTone(500, 'sine', 0.05);
+    }
+
+    function downloadStudentReceipt(orderId) {
+      const orders = getSavedOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const receiptText = `================================================
+CAMPUSDESK - HOSTEL 204 DIGITAL SERVICE RECEIPT
+================================================
+Order ID       : ${order.id}
+Date           : ${new Date(order.createdAt).toLocaleString()}
+Guest Token    : ${order.guestToken}
+Service        : ${order.serviceTitle}
+Quantity       : ${order.quantity}
+Total Paid     : INR ${order.amount.toFixed(2)}
+Payment Status : VERIFIED (UTR: ${order.utr || 'CASH-DESK'})
+Target Room    : ${order.roomNumber}
+File Integrity : SHA-256 (${order.encryptedFile ? order.encryptedFile.sha256 : 'N/A'})
+Crypto Tag     : AES-GCM 256-Bit Authenticated
+================================================
+Collect document from Room 204 or wait for runner.
+Operator helpline: Raghav (Room 204 Desk)
+================================================`;
+
+      const blob = new Blob([receiptText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CampusDesk_Receipt_${order.id}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Receipt downloaded successfully', 'success');
+    }
+
+    /* ====================================================================
+       9. GUEST CHAT ROOM SYSTEM (ANONYMOUS & E2EE ATTACHMENTS)
+       ==================================================================== */
+    function setCustomerTab(tabName) {
+      currentCustomerTab = tabName;
+      const tabs = ['services', 'chat', 'encryptor', 'orders'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`ctab-${t}`);
+        const panel = document.getElementById(`cpanel-${t}`);
+        if (t === tabName) {
+          btn.className = 'customer-tab flex items-center gap-2 pb-3 px-3 font-semibold border-b-2 border-indigo-500 text-indigo-400 transition-all';
+          panel.classList.remove('hidden');
+        } else {
+          btn.className = 'customer-tab flex items-center gap-2 pb-3 px-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all';
+          panel.classList.add('hidden');
+        }
+      });
+
+      if (tabName === 'chat') {
+        document.getElementById('unread-chat-badge').classList.add('hidden');
+        renderChatMessages();
+      }
+      lucide.createIcons();
+    }
+
+    function renderChatMessages() {
+      const container = document.getElementById('chat-messages-container');
+      const chats = getSavedChats();
+      const guestToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+
+      if (chats.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-500">
+            <i data-lucide="shield-check" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
+            <p class="text-xs">End-to-end encrypted session initialized.</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">Send a message to hostel operator or upload files directly.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = chats.map(msg => {
+        const isMe = (msg.sender === 'student' && msg.guestToken === guestToken);
+        const isOperator = msg.sender === 'operator';
+        const isSystem = msg.isSystem;
+
+        if (isSystem) {
+          return `
+            <div class="flex justify-center my-2">
+              <span class="text-[11px] px-3 py-1 rounded-full bg-slate-950/80 text-slate-400 border border-slate-800 font-mono">
+                ${msg.text}
+              </span>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+            ${!isMe ? `<div class="w-6 h-6 rounded-full bg-indigo-600 text-[10px] font-bold text-white flex items-center justify-center mb-1">OP</div>` : ''}
+            <div class="max-w-[80%] sm:max-w-md ${isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-br-none' : 'bg-slate-800 text-slate-100 rounded-2xl rounded-bl-none'} p-3.5 shadow-md">
+              <div class="flex items-center justify-between gap-3 text-[10px] opacity-75 mb-1">
+                <span class="font-semibold">${isMe ? 'You (Guest)' : 'Operator (Raghav)'}</span>
+                <span>${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <p class="text-xs leading-relaxed whitespace-pre-wrap">${msg.text}</p>
+              ${msg.attachment ? `
+                <div class="mt-2.5 p-2 rounded-xl bg-black/20 border border-white/10 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 truncate">
+                    <i data-lucide="file-lock" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                    <span class="text-[11px] font-mono truncate">${msg.attachment.fileName}</span>
+                  </div>
+                  <span class="text-[10px] text-emerald-300 font-mono shrink-0">AES-256</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function postChatMessage(messageObj) {
+      const chats = getSavedChats();
+      const finalMsg = {
+        id: 'MSG-' + Date.now(),
+        timestamp: new Date().toISOString(),
+        guestToken: localStorage.getItem(STORAGE_KEY_TOKEN),
+        ...messageObj
+      };
+      chats.push(finalMsg);
+      saveChats(chats);
+    }
+
+    function handleCustomerSendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      postChatMessage({
+        sender: 'student',
+        text: text
+      });
+
+      input.value = '';
+      playTone(580, 'sine', 0.08);
+
+      // Automated mock operator response if in customer view
+      setTimeout(() => {
+        simulateOperatorChatReply(text);
+      }, 1200);
+    }
+
+    function sendQuickChat(promptText) {
+      document.getElementById('chat-input').value = promptText;
+      document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    }
+
+    function triggerChatFileEncrypt() {
+      document.getElementById('chat-file-input').click();
+    }
+
+    async function handleChatFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      showToast(`Encrypting "${file.name}" with Web Crypto...`, 'info');
+      try {
+        const cipher = await encryptDocument(file, "HOSTEL-DESK-KEY-2026");
+        postChatMessage({
+          sender: 'student',
+          text: `Attached zero-knowledge document "${file.name}". Client cipher ready for Room 204 queue.`,
+          attachment: cipher
+        });
+        showToast('Document securely encrypted & transmitted in chat.', 'success');
+        playTone(720, 'triangle', 0.15);
+      } catch (err) {
+        showToast('Failed to encrypt file: ' + err.message, 'error');
+      }
+    }
+
+    function simulateOperatorChatReply(userMessage) {
+      const lower = userMessage.toLowerCase();
+      let reply = "Got your message at Room 204! Printing & desk operators are active.";
+
+      if (lower.includes('urgent') || lower.includes('binding')) {
+        reply = "Yes! Spiral binding machine is heated and ready at Room 204. Place the order or walk up to Desk.";
+      } else if (lower.includes('room') || lower.includes('location') || lower.includes('where')) {
+        reply = "We are located at Hostel Block B, 2nd Floor, Room 204 (Right next to water cooler).";
+      } else if (lower.includes('color') || lower.includes('print')) {
+        reply = "Both Color Laser and B&W duplex are loaded with fresh A4 75 GSM paper.";
+      }
+
+      postChatMessage({
+        sender: 'operator',
+        text: reply
+      });
+      playTone(440, 'sine', 0.1);
+
+      if (currentCustomerTab !== 'chat') {
+        const badge = document.getElementById('unread-chat-badge');
+        badge.classList.remove('hidden');
+      }
+    }
+
+    /* ====================================================================
+       10. OPERATOR / ADMIN DESK CONTROLLER
+       ==================================================================== */
+    function switchView(role) {
+      currentRole = role;
+      const custView = document.getElementById('customer-view');
+      const adminView = document.getElementById('admin-view');
+      const custBtn = document.getElementById('role-customer-btn');
+      const adminBtn = document.getElementById('role-admin-btn');
+
+      if (role === 'admin') {
+        custView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+
+        adminBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-indigo-600 text-white shadow-sm';
+        custBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800';
+
+        renderAdminOrdersStream();
+        renderAdminChatPreview();
+        updateAdminStats();
+        showToast('Switched to Hostel Desk Operator View (Room 204)', 'info');
+      } else {
+        adminView.classList.add('hidden');
+        custView.classList.remove('hidden');
+
+        custBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-indigo-600 text-white shadow-sm';
+        adminBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800';
+      }
+      lucide.createIcons();
+    }
+
+    function updateAdminStats() {
+      const orders = getSavedOrders();
+      const pending = orders.filter(o => o.status === 'PAID_PENDING_PRINT').length;
+      const completed = orders.filter(o => o.status === 'READY' || o.status === 'DELIVERED').length;
+      const totalRev = orders.filter(o => o.status !== 'AWAITING_PAYMENT').reduce((acc, curr) => acc + curr.amount, 0);
+
+      document.getElementById('stat-pending-orders').innerText = pending;
+      document.getElementById('stat-revenue').innerText = `₹${totalRev.toFixed(0)}`;
+      document.getElementById('stat-completed').innerText = completed;
+      document.getElementById('admin-badge-count').innerText = pending;
+    }
+
+    function renderAdminOrdersStream() {
+      const container = document.getElementById('admin-orders-stream');
+      const orders = getSavedOrders();
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500">
+            <i data-lucide="check-circle" class="w-8 h-8 mx-auto text-emerald-500/60 mb-2"></i>
+            <h4 class="text-sm font-semibold text-slate-300">Desk Queue Clear</h4>
+            <p class="text-xs text-slate-500 mt-1">No pending orders. Use "+ Load Test Order" or switch to Student view to place an order.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = orders.map(order => {
+        const isPaid = order.status !== 'AWAITING_PAYMENT';
+        const hasEncryptedDoc = !!order.encryptedFile;
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  ${order.id}
+                </span>
+                <span class="text-xs font-bold text-white">${order.serviceTitle}</span>
+                <span class="text-xs text-slate-400 font-mono">• ${order.guestToken}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold font-mono text-emerald-400">₹${order.amount.toFixed(2)}</span>
+                <span class="text-[11px] px-2 py-0.5 rounded font-medium ${isPaid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">
+                  ${order.status}
+                </span>
+              </div>
+            </div>
+
+            <!-- Details Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+              <div>
+                <span class="text-slate-500 text-[10px] uppercase font-mono block">Delivery Room / Note:</span>
+                <div class="font-medium text-slate-200">${order.roomNumber} - "${order.notes || 'None'}"</div>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] uppercase font-mono block">Payment UTR / Ref:</span>
+                <div class="font-mono text-emerald-400">${order.utr || 'Awaiting Payment'}</div>
+              </div>
+            </div>
+
+            <!-- Client Encrypted Document Inspection & Decrypt Action -->
+            ${hasEncryptedDoc ? `
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                    <span>E2EE Payload: ${order.encryptedFile.fileName} (${(order.encryptedFile.fileSize / 1024).toFixed(1)} KB)</span>
+                  </div>
+                  <span class="text-[10px] font-mono text-slate-500">SHA-256 Digest: ${order.encryptedFile.sha256.substring(0, 12)}...</span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                  <button 
+                    onclick="operatorDecryptOrder('${order.id}')"
+                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow"
+                  >
+                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                    <span>Decrypt & Open File</span>
+                  </button>
+                  <span class="text-[11px] text-slate-400">Uses Master Key: <code class="text-indigo-300 font-mono">HOSTEL-DESK-KEY-2026</code></span>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Status Controls -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+              <span class="text-[10px] text-slate-500">Received at: ${new Date(order.createdAt).toLocaleTimeString()}</span>
+              <div class="flex items-center gap-1.5">
+                <button onclick="updateOrderStatus('${order.id}', 'READY')" class="px-2.5 py-1 bg-emerald-700/60 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg transition-colors">
+                  Mark Ready
+                </button>
+                <button onclick="updateOrderStatus('${order.id}', 'DELIVERED')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition-colors">
+                  Fulfilled
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    async function operatorDecryptOrder(orderId) {
+      const orders = getSavedOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order || !order.encryptedFile) return;
+
+      const masterKey = document.getElementById('admin-master-key').value.trim() || 'HOSTEL-DESK-KEY-2026';
+      showToast('Decrypting file with Master Key in memory...', 'info');
+
+      const result = await decryptDocument(order.encryptedFile, masterKey);
+      if (result.success) {
+        // Trigger browser download or preview
+        const url = URL.createObjectURL(result.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `DECRYPTED_${order.encryptedFile.fileName}`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showToast(`Document decrypted! Downloaded: ${order.encryptedFile.fileName}`, 'success');
+        playTone(800, 'sine', 0.2);
+      } else {
+        showToast('Decryption Failed: ' + result.error, 'error');
+        playTone(220, 'square', 0.2);
+      }
+    }
+
+    function updateOrderStatus(orderId, newStatus) {
+      const orders = getSavedOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      order.status = newStatus;
+      saveOrders(orders);
+      showToast(`Order ${orderId} marked as ${newStatus}`, 'success');
+
+      // Post update to chat
+      postChatMessage({
+        sender: 'operator',
+        text: `Status Update for Order #${order.id}: ${newStatus === 'READY' ? '🎉 Your print / request is ready for pickup at Room 204!' : 'Order marked fulfilled. Thank you!'}`
+      });
+
+      renderAdminOrdersStream();
+      playTone(620, 'sine', 0.1);
+    }
+
+    function renderAdminChatPreview() {
+      const container = document.getElementById('admin-chat-preview');
+      const chats = getSavedChats();
+      container.innerHTML = chats.slice(-6).map(m => `
+        <div class="p-2 rounded-lg ${m.sender === 'operator' ? 'bg-indigo-950/40 border border-indigo-500/20 text-indigo-200' : 'bg-slate-950 border border-slate-800 text-slate-300'}">
+          <div class="flex items-center justify-between text-[10px] opacity-75">
+            <strong>${m.sender === 'operator' ? 'Desk Operator' : (m.guestToken || 'Student')}</strong>
+            <span>${new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+          <div class="mt-0.5">${m.text}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleOperatorSendChat(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      postChatMessage({
+        sender: 'operator',
+        text: text
+      });
+      input.value = '';
+      playTone(600, 'sine', 0.08);
+      renderAdminChatPreview();
+    }
+
+    function operatorQuickReply(msg) {
+      postChatMessage({
+        sender: 'operator',
+        text: msg
+      });
+      renderAdminChatPreview();
+      playTone(600, 'sine', 0.08);
+      showToast('Sent quick reply to student channel', 'info');
+    }
+
+    function updateUpiVpa() {
+      const vpa = document.getElementById('admin-upi-vpa').value.trim();
+      if (!vpa || !vpa.includes('@')) {
+        showToast('Please enter a valid UPI VPA with @ sign', 'error');
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY_VPA, vpa);
+      showToast('Hostel Desk UPI ID updated to: ' + vpa, 'success');
+    }
+
+    function populateSampleData() {
+      const sampleOrder = {
+        id: 'ORD-783921',
+        serviceId: 'print_bw',
+        serviceTitle: 'B&W Document Printing',
+        quantity: 15,
+        amount: 30.00,
+        guestToken: 'HOSTEL-4912',
+        roomNumber: 'Block C - 402',
+        notes: 'Print double-sided. Need by 11:30 PM.',
+        status: 'PAID_PENDING_PRINT',
+        utr: '419204819032',
+        encryptedFile: {
+          fileName: 'Final_Year_Minor_Project_Report.pdf',
+          fileType: 'application/pdf',
+          fileSize: 412000,
+          ivBase64: 'fO1pZ3L0a89kNmQ=',
+          saltBase64: 'YmFzZTY0c2FsdA==',
+          cipherBase64: 'ZXhhbXBsZWNpcGhlcmRhdGFhZXNnY20=',
+          sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+          encryptedAt: new Date().toISOString()
+        },
+        createdAt: new Date().toISOString()
+      };
+
+      const orders = getSavedOrders();
+      orders.unshift(sampleOrder);
+      saveOrders(orders);
+      showToast('Loaded mock student order ORD-783921', 'success');
+      playTone(550, 'sine', 0.1);
+    }
+
+    function clearDemoData() {
+      localStorage.removeItem(STORAGE_KEY_ORDERS);
+      localStorage.removeItem(STORAGE_KEY_CHATS);
+      syncOrdersFromStorage();
+      renderChatMessages();
+      renderAdminOrdersStream();
+      renderAdminChatPreview();
+      updateAdminStats();
+      showToast('All local demo data cleared', 'info');
+    }
+
+    /* ====================================================================
+       11. AUDIO EFFECTS (Web Audio API Synthesizer - Zero External Files)
+       ==================================================================== */
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('sound-icon');
+      if (soundEnabled) {
+        icon.setAttribute('data-lucide', 'volume-2');
+        showToast('Sound effects enabled', 'info');
+        playTone(660, 'sine', 0.1);
+      } else {
+        icon.setAttribute('data-lucide', 'volume-x');
+        showToast('Sound muted', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    function playTone(freq = 440, type = 'sine', duration = 0.1) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        // Audio unavailable
+      }
+    }
+
+    /* ====================================================================
+       12. UTILITY HELPERS (Clipboard, Toast, Info Modal)
+       ==================================================================== */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = {
+        info: 'bg-slate-900 border-indigo-500/40 text-indigo-300',
+        success: 'bg-slate-900 border-emerald-500/40 text-emerald-300',
+        error: 'bg-slate-900 border-rose-500/40 text-rose-300'
+      };
+
+      const icons = {
+        info: 'info',
+        success: 'check-circle-2',
+        error: 'alert-triangle'
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      // Animate in
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      // Remove after 3.5s
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback copy failed', err);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function openInfoModal() {
+      document.getElementById('info-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeInfoModal() {
+      document.getElementById('info-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
